@@ -51,4 +51,18 @@ describe('MatcherSim Tests', () => {
             {process_id:"PROC001",request_time:1753696740,timeout:4,constraints:{resource_type:"CPU",os:"Linux"},preferences:{location:{zone:"zone-1",priority:1},capacity_class:{class:"high",priority:2}},status:"dropped",resource_id:"-",wait_time_secs:-1,matchedAt:'-'},
         );
     });
+
+    it('should allocate 2nd priority resource if first priority is not available', () => {
+        const resourceData = [
+            {resource_id: "RES001", available_at: 1753696750, capabilities: {resource_type: "GPU", os: "Linux", location: "zone-1", capacity_class: "high"}},
+            {resource_id: "RES002", available_at: 1753696740, capabilities: {resource_type: "GPU", os: "Linux", location: "zone-1", capacity_class: "low"}},
+        ]
+        const processData = [
+            {process_id: "PROC001", request_time: 1753696740, timeout: 4, constraints: {resource_type: "GPU", os: "Linux"}, preferences: {location: {zone: "zone-1", priority: 1}, capacity_class: {class: "high", priority: 2}}},
+        ] 
+        const result = matchResourceToProcess(resourceData, processData);
+        expect(result['PROC001']).toEqual(
+            {process_id:"PROC001",request_time:1753696740,timeout:4,constraints:{resource_type:"GPU",os:"Linux"},preferences:{location:{zone:"zone-1",priority:1},capacity_class:{class:"high",priority:2}},status:"matched",resource_id:"RES002",wait_time_secs:0,matchedAt:1753696740},
+        );
+    });
 })
